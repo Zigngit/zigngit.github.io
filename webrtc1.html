@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>WebRTC Video Peer Connection (Local File)</title>
+</head>
+<body>
+
+  <h1>Local Video File</h1>
+  <video id="localVideo" autoplay playsinline controls>
+    <source src="your-video-file.mp4" type="video/mp4"> 
+    Your browser doesn't support HTML5 video.
+  </video>
+
+  <h2>SDP Exchange</h2>
+  <h3>Local SDP</h3>
+  <textarea id="localSdp" rows="5" cols="50"></textarea>
+  <button id="copyLocalSdp">Copy Local SDP</button>
+
+  <h3>Remote SDP</h3>
+  <textarea id="remoteSdp" rows="5" cols="50"></textarea>
+  <button id="setRemoteSdp">Set Remote SDP</button>
+
+  <script>
+    let peerConnection;
+
+    // Get video and SDP elements
+    const localVideo = document.getElementById('localVideo');
+    const localSdp = document.getElementById('localSdp');
+    const remoteSdp = document.getElementById('remoteSdp');
+
+    // Get button elements
+    const copyLocalSdpButton = document.getElementById('copyLocalSdp');
+    const setRemoteSdpButton = document.getElementById('setRemoteSdp');
+
+    // Create peer connection
+    peerConnection = new RTCPeerConnection();
+
+    // Create a MediaStream from the video element
+    const stream = localVideo.captureStream();
+
+    // Add stream to peer connection
+    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+
+    // Listen for ICE candidates
+    peerConnection.onicecandidate = event => {
+      if (event.candidate) {
+        // In a real application, send ICE candidates to the other peer
+        console.log('ICE candidate:', event.candidate);
+      }
+    };
+
+    // Create offer
+    peerConnection.createOffer()
+      .then(offer => {
+        peerConnection.setLocalDescription(offer);
+        localSdp.value = offer.sdp; // Display local SDP
+      })
+      .catch(error => console.error('Error creating offer:', error));
+
+    // Copy local SDP to clipboard
+    copyLocalSdpButton.addEventListener('click', () => {
+      localSdp.select();
+      document.execCommand('copy');
+    });
+
+    // Set remote SDP and create answer
+    setRemoteSdpButton.addEventListener('click', () => {
+      const sdp = new RTCSessionDescription({
+        type: 'answer',
+        sdp: remoteSdp.value
+      });
+
+      peerConnection.setRemoteDescription(sdp)
+        .then(() => {
+          // In a real application, send the answer to the other peer
+          console.log('Remote SDP set successfully');
+        })
+        .catch(error => console.error('Error setting remote SDP:', error));
+    });
+  </script>
+
+</body>
+</html>

@@ -28,6 +28,7 @@
   </p>
 </body>
 <script type="text/javascript">
+  let localVideoFile = document.getElementById('localVideo');
   let localVideo = document.getElementById('local_video');
   let remoteVideo = document.getElementById('remote_video');
   let localStream = null;
@@ -44,7 +45,7 @@
   // ---------------------- media handling ----------------------- 
   // start local video
   function startVideo() {
-      const stream = localVideo.captureStream();
+      const stream = localVideoFile.captureStream();
     
       localStream = stream;
       playVideo(localVideo, stream);
